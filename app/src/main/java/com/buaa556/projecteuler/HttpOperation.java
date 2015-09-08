@@ -27,7 +27,8 @@ public class HttpOperation {
     /**
      * number must bigger than 1
      * when reaching max,return null
-     * else return an Object array. string[0] is title,string [1] is description(html),int [2] is difficulty, int [3] is solved
+     * else return an Object array. string[0] is title,string [1] is description(html),int [2] is solved,
+     * int [3] is difficulty rating(0 if not stated in the website)
      * @param number
      */
     public Object []  httpGet(int number){
@@ -79,15 +80,31 @@ public class HttpOperation {
                 throw new ParserException();
             }
             Node stringNode=stringNodeList.elementAt(0);
-            String sovledAndDifficulty = stringNode.toPlainTextString();
-
+            String solvedAndDifficulty = stringNode.toPlainTextString();
+            String [] strs=solvedAndDifficulty.split(";");
+            if(strs.length==2){ //no difficulty rating
+                strs[1]=strs[1].trim();
+                int solved=Integer.parseInt(strs[1].split(" ")[2]);
+                array[2]=solved;
+                array[3]=0;
+            }else if (strs.length==3){
+                strs[1]=strs[1].trim();
+                int solved=Integer.parseInt(strs[1].split(" ")[2]);
+                array[2]=solved;
+                int difficultyRating=Integer.parseInt(strs[2].split(": ")[1]);
+                array[3]=difficultyRating;
+            }else{
+                throw new ParserException();
+            }
         } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (ParserException e) {
+            e.printStackTrace();
+        }catch(NumberFormatException e) {
+            e.printStackTrace();
+        }catch(NullPointerException e){
             e.printStackTrace();
         }finally {
             return array;
