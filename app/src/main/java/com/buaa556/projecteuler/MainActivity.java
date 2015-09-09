@@ -1,26 +1,28 @@
 package com.buaa556.projecteuler;
 
-import android.app.Activity;
-
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
-import android.os.Build;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.view.Gravity;
+import android.os.Handler;
+import android.support.v4.widget.DrawerLayout;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.File;
 
 public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
+    private static Handler handler=new Handler();
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -31,6 +33,8 @@ public class MainActivity extends Activity
      */
     private CharSequence mTitle;
 
+    private static DataBaseHelper dbHelper;
+    private static SQLiteDatabase db=null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,9 +49,26 @@ public class MainActivity extends Activity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
-        new Thread(){
+        dbHelper=new DataBaseHelper();
+        handler.post(new Thread() {
+            public void run() {
+                File f=new File(MainActivity.this.getFilesDir().getAbsolutePath().replace("files", "databases"));
+                f.mkdir();
+                db = SQLiteDatabase.openOrCreateDatabase(MainActivity.this.getFilesDir().getAbsolutePath().replace("files", "databases") + File.separator+"prjeuler.db",null);
+            }
+        });
+    }
+
+
+    public static void updateDatabase(final Context context) {
+        new Thread() {
             public void run(){
-                HttpOperation.httpGet(525);
+                Cursor c = db.rawQuery("select id from cache", null);
+                int i = c.getCount() + 1;
+
+                int count = dbHelper.generateFrom(i, db);
+                Toast.makeText(context,"成功添加了" + count + "道题目", Toast.LENGTH_SHORT).show();
+
             }
         }.start();
     }
@@ -111,6 +132,7 @@ public class MainActivity extends Activity
         return super.onOptionsItemSelected(item);
     }
 
+
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -150,5 +172,4 @@ public class MainActivity extends Activity
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
     }
-
 }

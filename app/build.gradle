@@ -22,10 +22,5 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:support-v4:23.0.0'
-    compile files('libs/htmlparser.jar')
-    compile files('libs/filterbuilder.jar')
-    compile files('libs/htmllexer.jar')
-    compile files('libs/junit.jar')
-    compile files('libs/sax2.jar')
-    compile files('libs/thumbelina.jar')
+    compile files('libs/jsoup-1.8.3.jar')
 }

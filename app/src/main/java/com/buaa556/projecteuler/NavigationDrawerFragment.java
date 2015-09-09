@@ -1,16 +1,18 @@
 package com.buaa556.projecteuler;
 
 
-import android.app.Activity;
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.Fragment;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.net.Uri;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,6 +23,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import java.io.File;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -248,10 +252,15 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         if (item.getItemId() == R.id.action_example) {
-            Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "开始更新,请确认网络已连接", Toast.LENGTH_SHORT).show();
+            MainActivity.updateDatabase(this.getActivity());
             return true;
         }
-
+        Intent intent = new Intent();
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        File file = new File("");
+        intent.setDataAndType(Uri.fromFile(file), "video/*");
+        startActivity(intent);
         return super.onOptionsItemSelected(item);
     }
 
