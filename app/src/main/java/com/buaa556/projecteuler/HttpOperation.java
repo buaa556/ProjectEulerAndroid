@@ -43,7 +43,7 @@ public class HttpOperation {
 
 
         }catch(Exception e){
-            Log.e("exception","exception"+e.getMessage());
+            Log.e("exception","exception"+e.getClass());
             return null;
         }
 

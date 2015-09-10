@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.io.File;
@@ -25,7 +27,20 @@ import java.io.InputStream;
 public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
-    private static Handler handler=new Handler();
+    private Handler handler=new Handler(){
+        public void handleMessage(Message msg){
+            super.handleMessage(msg);
+            Bundle data=msg.getData();
+            int p=data.getInt("value");
+            String toast;
+            if(p!=0)
+                toast="成功添加了" + p + "道题目";
+            else
+                toast="题目没有更新";
+            Toast.makeText(MainActivity.this,toast, Toast.LENGTH_SHORT).show();
+
+        }
+    };
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -38,6 +53,10 @@ public class MainActivity extends Activity
 
     private static DataBaseHelper dbHelper;
     private static SQLiteDatabase db=null;
+
+
+    private LinearLayout layout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,19 +75,36 @@ public class MainActivity extends Activity
         dbHelper=new DataBaseHelper();
         handler.post(new Thread() {
             public void run() {
-                db =openDatabase();
+                db = openDatabase();
             }
         });
+
+        //布局
+        this.layout=(LinearLayout)findViewById(R.id.linear_layout);
+
+        for(int i=1;i<515;i++)
+            layout.addView(new TitleView(this,i));
+
+
     }
 
 
-    public static int updateDatabase(final Context context) {
+    public void updateDatabase(final Context context) {
+        Toast.makeText(MainActivity.this, "开始更新,请确认网络已连接", Toast.LENGTH_SHORT).show();
+        new Thread(){
+            public void run(){
 
-        Cursor c = db.rawQuery("select id from cache", null);
-        int i = c.getCount() + 1;
-
-        int count = dbHelper.generateFrom(i, db);
-        return count;
+                Cursor c = db.rawQuery("select id from cache", null);
+                int i = c.getCount() + 1;
+                Log.i("now have", i + "");
+                int p = dbHelper.generateFrom(i, db);
+                Message msg=new Message();
+                Bundle data=new Bundle();
+                data.putInt("value",p);
+                msg.setData(data);
+                handler.sendMessage(msg);
+            }
+        }.start();
 
     }
 
@@ -125,14 +161,8 @@ public class MainActivity extends Activity
 
         //noinspection SimplifiableIfStatement
         if (id ==R.id.action_settings) {
-            Toast.makeText(this, "开始更新,请确认网络已连接", Toast.LENGTH_SHORT).show();
-            int p=MainActivity.updateDatabase(MainActivity.this);
-            String toast;
-            if(p!=0)
-                toast="成功添加了" + p + "道题目";
-            else
-                toast="题目没有更新";
-            Toast.makeText(this,toast, Toast.LENGTH_SHORT).show();
+
+            updateDatabase(MainActivity.this);
             return true;
         }
 
