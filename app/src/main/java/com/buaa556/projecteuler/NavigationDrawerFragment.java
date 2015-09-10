@@ -253,7 +253,13 @@ public class NavigationDrawerFragment extends Fragment {
 
         if (item.getItemId() == R.id.action_example) {
             Toast.makeText(getActivity(), "开始更新,请确认网络已连接", Toast.LENGTH_SHORT).show();
-            MainActivity.updateDatabase(this.getActivity());
+            int p=MainActivity.updateDatabase(this.getActivity());
+            String toast;
+            if(p!=0)
+                toast="成功添加了" + p + "道题目";
+            else
+                toast="题目没有更新";
+            Toast.makeText(getActivity(),toast, Toast.LENGTH_SHORT).show();
             return true;
         }
         Intent intent = new Intent();

@@ -1,5 +1,6 @@
 package com.buaa556.projecteuler;
 
+import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -24,6 +25,13 @@ public class DataBaseHelper  {
         }
     }
 
+    /**
+     * update the database db from problem i.
+     * attention :problem i will be visited
+     * @param i
+     * @param db
+     * @return
+     */
     public int generateFrom(int i,SQLiteDatabase db){
         HttpOperation httpOp=new HttpOperation();
         int o=i;
@@ -35,17 +43,23 @@ public class DataBaseHelper  {
     }
 
     private void insert(Object[] objs, SQLiteDatabase db, int i) {
-        String sql="INSERT INTO cache(id,title,description,solved,difficulty) VALUES(";
-        sql+=i+",";
-        sql+="\'"+(String)objs[0]+"\',";
-        sql+="\'"+(String)objs[1]+"\',";
-        sql+=(Integer)objs[2]+",";
-        sql+=(Integer)objs[3]+")";
-        Log.i("insert",""+objs[0]);
-        db.execSQL(sql);
-
+        ContentValues cv = new ContentValues();
+        cv.put("id", i);
+        cv.put("title",(String)objs[0]);
+        cv.put("description",(String)objs[1]);
+        cv.put("solved",(Integer)objs[2]);
+        cv.put("difficulty",(Integer)objs[3]);
+        //插入ContentValues中的数据
+        db.insert("cache",null,cv);
+        Log.i("insert",i+" "+(String)objs[0]);
     }
 
+
+    /**
+     * have bug in it. never mind  won't be used again
+     * @param objs
+     * @param db
+     */
     private void insert(Object [] objs,SQLiteDatabase db){
         String sql="INSERT INTO cache(title,description,solved,difficulty) VALUES(";
         sql+="\'"+(String)objs[0]+"\',";

@@ -30,7 +30,7 @@ public class HttpOperation {
             Elements title = doc.getElementsByTag("h2");
             array[0]=title.text();
             Elements description=doc.getElementsByAttributeValue("class", "problem_content");
-            array[1]=description.html();
+            array[1]=description.outerHtml();
             Elements info=doc.getElementsByAttributeValue("id", "problem_info");
             String solveAndDiff=info.text();
             String [] splited=solveAndDiff.split(";");

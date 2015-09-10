@@ -10,14 +10,16 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 
 public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -49,28 +51,24 @@ public class MainActivity extends Activity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
+        //数据库相关配置
         dbHelper=new DataBaseHelper();
         handler.post(new Thread() {
             public void run() {
-                File f=new File(MainActivity.this.getFilesDir().getAbsolutePath().replace("files", "databases"));
-                f.mkdir();
-                db = SQLiteDatabase.openOrCreateDatabase(MainActivity.this.getFilesDir().getAbsolutePath().replace("files", "databases") + File.separator+"prjeuler.db",null);
+                db =openDatabase();
             }
         });
     }
 
 
-    public static void updateDatabase(final Context context) {
-        new Thread() {
-            public void run(){
-                Cursor c = db.rawQuery("select id from cache", null);
-                int i = c.getCount() + 1;
+    public static int updateDatabase(final Context context) {
 
-                int count = dbHelper.generateFrom(i, db);
-                Toast.makeText(context,"成功添加了" + count + "道题目", Toast.LENGTH_SHORT).show();
+        Cursor c = db.rawQuery("select id from cache", null);
+        int i = c.getCount() + 1;
 
-            }
-        }.start();
+        int count = dbHelper.generateFrom(i, db);
+        return count;
+
     }
 
     @Override
@@ -171,5 +169,52 @@ public class MainActivity extends Activity
             ((MainActivity) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
+    }
+
+    //操作数据库相关代码
+    private final String DATABASE_PATH = android.os.Environment.getExternalStorageDirectory().getAbsolutePath()
+            + "/ProjectEuler";
+    private final String DATABASE_FILENAME = "projecteuler.db";
+
+
+    /**
+     * return a database in the sdcard. first open the app, the database file will be copied to sdcard from res/raw
+     * @return
+     */
+    private SQLiteDatabase openDatabase()
+    {
+        try
+        {
+            // 获得*.db文件的绝对路径
+            String databaseFilename = DATABASE_PATH+ "/" + DATABASE_FILENAME;
+            File dir = new File(DATABASE_PATH);
+
+            if (!dir.exists())
+                dir.mkdir();
+
+            if (!(new File(databaseFilename)).exists())
+            {
+                // 获得封装ddb文件的InputStream对象
+                InputStream is =getResources().openRawResource(R.raw.projecteuler);
+                FileOutputStream fos = new FileOutputStream(databaseFilename);
+                byte[] buffer = new byte[7168];
+                int count = 0;
+                // 开始复制db文件
+                while ((count = is.read(buffer)) > 0)
+                {
+                    fos.write(buffer, 0, count);
+                }
+                fos.close();
+                is.close();
+            }
+            SQLiteDatabase database = SQLiteDatabase.openOrCreateDatabase(databaseFilename, null);
+            return database;
+        }
+        catch (Exception e)
+        {
+            Log.e("exception", "Exception has been detected while loading database");
+
+        }
+        return null;
     }
 }
