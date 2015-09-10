@@ -1,9 +1,11 @@
 package com.buaa556.projecteuler;
 
 import android.content.Context;
-import android.graphics.Canvas;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.Button;
 
 /**
@@ -29,6 +31,7 @@ public class TitleView extends Button {
     }
 
 
+    private SQLiteDatabase db;
     /**
      * Constructor.
      * id has to be set .
@@ -36,24 +39,19 @@ public class TitleView extends Button {
      * @param context
      * @param id
      */
-    public TitleView(Context context,int id) {
+    public TitleView(Context context,int id,SQLiteDatabase db) {
         super(context);
         this.problemId=id;
         mPaint = new Paint();
-
+        this.db=db;
+        Cursor c=db.rawQuery("SELECT * FROM cache WHERE id="+id,null);
+        c.moveToFirst();
+        Log.i("query result","id:"+id+" "+c.getCount());
+        String title=c.getString(1);
+        int difficulty=c.getInt(4);
+        this.setText(id+":"+title+" ("+difficulty/5+")");
     }
 
-    public void onDraw(Canvas canvas){
-        super.onDraw(canvas);
-        mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setColor(getResources().getColor(R.color.darkorange));
-
-        canvas.drawCircle(72, 72, 60, mPaint);
-        mPaint.setColor(getResources().getColor(R.color.white));
-        mPaint.setTextAlign(Paint.Align.CENTER);
-        mPaint.setTextSize(80f);
-        canvas.drawText(problemId + "", 72, 72, mPaint);
-    }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {

@@ -30,16 +30,33 @@ public class MainActivity extends Activity
     private Handler handler=new Handler(){
         public void handleMessage(Message msg){
             super.handleMessage(msg);
-            Bundle data=msg.getData();
-            int p=data.getInt("value");
-            String toast;
-            if(p!=0)
-                toast="成功添加了" + p + "道题目";
-            else
-                toast="题目没有更新";
-            Toast.makeText(MainActivity.this,toast, Toast.LENGTH_SHORT).show();
+            /**
+             * 0 :更新操作
+             * 1 :打开数据库
+             */
+            switch(msg.what) {
+                case 0:
+                    Bundle data = msg.getData();
+                    int p = data.getInt("diff");
+                    int s = data.getInt("start");
+                    String toast;
+                    if (p != 0) {
+                        toast = "成功添加了" + p + "道题目";
+                        for(int i=s;i<s+p;i++)
+                            layout.addView(new TitleView(MainActivity.this,i,db));
+                    }
+                    else
+                        toast = "题目没有更新";
+                    Toast.makeText(MainActivity.this, toast, Toast.LENGTH_SHORT).show();
+                    break;
+                case 1:
 
+                    for(int i=1;i<515;i++)
+                        layout.addView(new TitleView(MainActivity.this,i,db));
+                    break;
+            }
         }
+
     };
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -71,19 +88,23 @@ public class MainActivity extends Activity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
-        //数据库相关配置
-        dbHelper=new DataBaseHelper();
-        handler.post(new Thread() {
-            public void run() {
-                db = openDatabase();
-            }
-        });
+
 
         //布局
         this.layout=(LinearLayout)findViewById(R.id.linear_layout);
 
-        for(int i=1;i<515;i++)
-            layout.addView(new TitleView(this,i));
+        //数据库相关配置
+        dbHelper=new DataBaseHelper();
+        new Thread() {
+            public void run() {
+                db = openDatabase();
+                Message msg=new Message();
+                msg.what=1;
+                handler.sendMessage(msg);
+            }
+        }.start();
+
+
 
 
     }
@@ -99,10 +120,14 @@ public class MainActivity extends Activity
                 Log.i("now have", i + "");
                 int p = dbHelper.generateFrom(i, db);
                 Message msg=new Message();
+                msg.what=0;
                 Bundle data=new Bundle();
-                data.putInt("value",p);
+                data.putInt("diff",p);
+                data.putInt("start",i);
+
                 msg.setData(data);
                 handler.sendMessage(msg);
+                c.close();
             }
         }.start();
 
