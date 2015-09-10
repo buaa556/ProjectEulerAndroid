@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -123,7 +124,15 @@ public class MainActivity extends Activity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id ==R.id.action_settings) {
+            Toast.makeText(this, "开始更新,请确认网络已连接", Toast.LENGTH_SHORT).show();
+            int p=MainActivity.updateDatabase(MainActivity.this);
+            String toast;
+            if(p!=0)
+                toast="成功添加了" + p + "道题目";
+            else
+                toast="题目没有更新";
+            Toast.makeText(this,toast, Toast.LENGTH_SHORT).show();
             return true;
         }
 
